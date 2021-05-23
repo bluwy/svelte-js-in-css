@@ -1,0 +1,12 @@
+{
+	"name": "svelte-js-in-css",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"devDependencies": {
+		"svelte": "^3.38.2"
+	},
+	"dependencies": {
+		"magic-string": "^0.25.7"
+	}
+}
