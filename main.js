@@ -5,27 +5,42 @@ const { less, postcss, sass, scss, stylus } = require('svelte-preprocess')
 const { asMarkupPreprocessor } = require('svelte-as-markup-preprocessor')
 const MagicString = require('magic-string')
 
+const TEST_BACKTICK_SYNTAX = process.argv.includes('--backtick')
+const QUIET_LOG = process.argv.includes('--quiet')
+
 testInput('Css')
-// testInput('Less', [less()])
+testInput('Less', [less()])
 testInput('Sass', [sass()])
 testInput('Scss', [scss()])
 testInput('Stylus', [stylus()])
-testInput('Sugarss', [postcss({ parser: require('sugarss'), plugins: [], stripIndent: true })])
 testInput('Postcss', [postcss({ plugins: [require('postcss-nested')] })])
+// prettier-ignore
+testInput('Sugarss', [postcss({ parser: require('sugarss'), plugins: [], stripIndent: true })])
 
 async function testInput(name, preprocessors = []) {
-  const inputFilePath = `./tests/${name}Input.svelte`
-  const outputFilePath = `./tests/${name}Output.svelte`
+  try {
+    const inputFilePath = `./tests/${name}Input.svelte`
+    const outputFilePath = `./tests/${name}Output.svelte`
 
-  const input = await fs.readFile(inputFilePath, { encoding: 'utf-8' })
+    let input = await fs.readFile(inputFilePath, { encoding: 'utf-8' })
 
-  const { code } = await preprocess(
-    input,
-    [asMarkupPreprocessor(preprocessors), jsInCss()],
-    { filename: inputFilePath }
-  )
+    if (TEST_BACKTICK_SYNTAX) {
+      input = input.replace(/js\((.*?)\)/g, `\`$1\``)
+    }
 
-  await fs.writeFile(outputFilePath, code)
+    const { code } = await preprocess(
+      input,
+      [asMarkupPreprocessor(preprocessors), jsInCss()],
+      { filename: inputFilePath }
+    )
+
+    await fs.writeFile(outputFilePath, code)
+  } catch (e) {
+    console.log(`${name} is not happy`)
+    if (!QUIET_LOG) {
+      console.log(e)
+    }
+  }
 }
 
 function jsInCss() {
@@ -39,9 +54,9 @@ function jsInCss() {
       const cssContent = content.slice(ast.css.start, ast.css.end)
       const jsExpressions = new Map()
 
-      const jsFunctionRegex = /js\((.*?)\)/g
+      const re = TEST_BACKTICK_SYNTAX ? /`(.*?)`/g : /js\((.*?)\)/g
       let match
-      while ((match = jsFunctionRegex.exec(cssContent))) {
+      while ((match = re.exec(cssContent))) {
         const jsHash = hash(match[1] + filename)
         jsExpressions.set(jsHash, match[1])
         // Rename to "js(a + b)" => "var(--abc123)"

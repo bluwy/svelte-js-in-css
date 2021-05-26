@@ -46,6 +46,12 @@ Preprocesses to:
 
 ```bash
 $ node main.js
+
+# Only report failed css types, no error logs
+$ node main.js --queit
+
+# Test backtick syntax
+$ node main.js --backtick
 ```
 
 ## Caveats
