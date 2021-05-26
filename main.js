@@ -1,16 +1,31 @@
-import fs from 'fs/promises'
-import crypto from 'crypto'
-import { parse, preprocess } from 'svelte/compiler'
-import MagicString from 'magic-string'
+const fs = require('fs/promises')
+const crypto = require('crypto')
+const { parse, preprocess } = require('svelte/compiler')
+const { less, postcss, sass, scss, stylus } = require('svelte-preprocess')
+const { asMarkupPreprocessor } = require('svelte-as-markup-preprocessor')
+const MagicString = require('magic-string')
 
-main()
+testInput('Css')
+// testInput('Less', [less()])
+testInput('Sass', [sass()])
+testInput('Scss', [scss()])
+testInput('Stylus', [stylus()])
+testInput('Sugarss', [postcss({ parser: require('sugarss'), plugins: [], stripIndent: true })])
+testInput('Postcss', [postcss({ plugins: [require('postcss-nested')] })])
 
-async function main() {
-  const input = await fs.readFile('./TestInput.svelte', { encoding: 'utf-8' })
+async function testInput(name, preprocessors = []) {
+  const inputFilePath = `./tests/${name}Input.svelte`
+  const outputFilePath = `./tests/${name}Output.svelte`
 
-  const { code } = await preprocess(input, jsInCss())
+  const input = await fs.readFile(inputFilePath, { encoding: 'utf-8' })
 
-  await fs.writeFile('./TestOutput.svelte', code)
+  const { code } = await preprocess(
+    input,
+    [asMarkupPreprocessor(preprocessors), jsInCss()],
+    { filename: inputFilePath }
+  )
+
+  await fs.writeFile(outputFilePath, code)
 }
 
 function jsInCss() {
@@ -56,5 +71,10 @@ function jsInCss() {
 }
 
 function hash(input = '') {
-  return crypto.createHash('md5').update(input).digest('base64').substring(0, 6)
+  return crypto
+    .createHash('md5')
+    .update(input)
+    .digest('base64')
+    .replace(/(\+|\/|\=)/g, '')
+    .substring(0, 6)
 }

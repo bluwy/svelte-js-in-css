@@ -2,9 +2,16 @@
 	"name": "svelte-js-in-css",
 	"private": true,
 	"license": "MIT",
-	"type": "module",
 	"devDependencies": {
-		"svelte": "^3.38.2"
+		"less": "^4.1.1",
+		"postcss": "^8.3.0",
+		"postcss-nested": "^5.0.5",
+		"sass": "^1.34.0",
+		"stylus": "^0.54.8",
+		"sugarss": "^3.0.3",
+		"svelte": "^3.38.2",
+		"svelte-as-markup-preprocessor": "^0.2.0",
+		"svelte-preprocess": "^4.7.3"
 	},
 	"dependencies": {
 		"magic-string": "^0.25.7"
