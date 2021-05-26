@@ -12,7 +12,7 @@
     background-color: js(bg);
 
     div {
-      width: js(num + 'px');
+      width: ~"js(num + 'px')";
       overflow: hidden;
     }
   }
