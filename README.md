@@ -2,6 +2,8 @@
 
 When CSS plays uno reverse.
 
+For RFC: https://github.com/sveltejs/rfcs/pull/51
+
 > **This project is an experiment**. No npm packages published at the moment.
 
 ## Idea
